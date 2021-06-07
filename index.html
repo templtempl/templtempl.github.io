@@ -4,11 +4,72 @@
         <meta charset="utf-8">
         <link rel="stylesheet" href="stylesheet.css">
     </head>
-    <body>
-        <div class="main">
-            <p id="test">0 Gold Mined</p>
-            <button onclick="mineGold()">Mine Gold</button>
-            <script src="main.js" charset="utf-8" type="text/javascript"></script>
+    <body onload="introCheck()">
+        <div class="sidebar">
+            <div class="title hidden" id="title">
+                <div>
+                    <p class="titletext">VANGUARD STATION 7209</p>
+                    <p class="subtitletext">STATION AI NO. 2556-5139</p>
+                </div>
+            </div>
+            <div class="inv hidden" id="inv">
+                <div class="invleft">
+                    <p>Power</p>
+                </div>
+                <div class="invright">
+                    <p id="powerInv" style="margin-bottom:0">0  <img src="images/powerIcon.png" height="15" width="15"></p>
+                    <p id="powerChange" style="font-size:0.8vw;margin:0px">+0</p>
+                </div>
+                <button onclick="reset()" class="button">Reset</button>
+            </div>
         </div>
+        <div class="main">
+            <div class="feed hidden" id="feed">
+            </div>
+            <div class="tray hidden" id="tray">
+                <div class="trayLeft" id="trayLeft">
+                    <div class="trayLeftTop" id="trayLeftTop">
+                        <p style="font-weight:bold; font-size: 1.5vw; margin: 1vh auto; position: block">SOLAR PANELS</p>
+                        <button onclick="panelBuy()" class="button disabled" id="panelBuy">Unfold Panel</button>
+                        <button onclick="panelUpgradeOne()" class="button disabled hidden" id="panelUpgrade">Clean Panels</button>
+                    </div>
+                    <div class="trayLeftBottom hidden" id="trayLeftBottom">
+                        <p style="font-weight:bold; font-size: 1.5vw; margin: 1vh auto; position: block">MINING DRONES</p>
+                        <button onclick="houndBuy()" class="button disabled" id="houndBuy">Activate Hound Drone</button>
+                        <button onclick="exploratoryCharge()" class="button disabled" id="exploratoryCharge">Start Charging</button>
+                    </div>
+                </div>
+                <div class="trayCentreLeft" id="trayCentreLeft">
+                    <div class="trayCentreLeftTop hidden" id="trayCentreLeftTop">
+                        <p>CLT</p>
+                    </div>
+                    <div class="trayCentreLeftBottom hidden" id="trayCentreLeftBottom">
+                        <p>CLB</p>
+                    </div>
+                </div>
+                <div class="trayCentreRight" id="trayCentreRight">
+                    <div class="trayCentreRightTop hidden" id="trayCentreRightTop">
+                        <p>CRT</p>
+                    </div>
+                    <div class="trayCentreRightBottom hidden" id="trayCentreRightBottom">
+                        <p>CRB</p>
+                    </div>
+                </div>
+                <div class="trayRight" id="trayRight">
+                    <div class="trayRightTop hidden" id="trayRightTop">
+                        <p>RT</p>
+                    </div>
+                    <div class="trayRightBottom hidden" id="trayRightBottom">
+                        <p>RB</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="story" id="storyIntro">
+            <p id="story"></p>
+            <button onclick="introButtonOne()" class="buttonStory hidden" id="introButton" disabled=true>Generate Power</button>
+            <p id="storyPower" class="storywatts hidden">0</p>
+        </div>
+        <script src="main.js" charset="utf-8" type="text/javascript"></script>
     </body>
 </html>
