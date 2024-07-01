@@ -10,64 +10,103 @@ var typewriter = {
 
 // Strings to be fed into typewriter
 var txt = {
-    one: "Destination reached.",
+    one: "Specified distance reached.",
     two: "Restoring Station AI to full functionality.",
     three: "WARNING: LOW POWER",
-    four: "Manual power generation required.",
+    four: "Emergency power generation online.",
     five: "Sufficient power stored.",
     six: "Unfold solar panel?",
     seven: "Solar panel unfolded.",
-    eight: "Automatic power generation enabled.",
+    eight: "Automatic power generation online.",
+    panelBuy: "Solar panel unfolded.",
+    panelUpgrade1: "Solar panels aligned for maximum efficiency."
 }
 
 // How much do I have of a resource?
+
 var inv = {
     power: 0,
+    ice: 0,
+    rock: 0,
+    metal: 0,
 }
 
+// What is the maximum quantity of a resource?
+
+var invMax = {
+    power: 50,
+    ice: 0,
+    rock: 0,
+    metal: 0,
+}
+
+// What is the storage increase?
+
+var invStore = {
+    power: 50,
+    ice: 0,
+    rock: 0,
+    metal: 0,
+}
 
 // How many times have I upgraded a generator?
 
 var upgrade = {
     panel: 0,
-    hound: 0,
+    miningDrone: 0,
 }
 
 // How much does the upgrade change the amount generated?
 
 var upgradeChange = {
-    panel: [0.3, 0.5, 1],
+    panel: [0.5, 1],
 }
 
 // How much does the generator cost?
 var cost = {
     panel: 10,
-    panelUpgradePower: [25, 100, 500, 5000],
-    hound: 1000,
+    panelUpgrade: [100, 500, 5000],
+    miningDrone: 500,
 }
 
 // How many generators do I have?
 var gen = {
     panel: 0,
-    hound: 0,
+    miningDrone: 0,
+}
+
+// How many active do I have?
+var active = {
+    miningDrone: 0,
+}
+// What is the maximum quantity of the generator?
+var genMax = {
+    panel: 10,
+    miningDrone: 5,
 }
 
 // How much of a resource do generators produce?
 var prod = {
-    panel: 0.2,
+    panel: 0.5,
+}
+
+// How much of a resource is being used?
+var usage = {
+    power: 0,
+    ice: 0,
+    rock: 0,
+    metal: 0,
 }
 
 // What is the overall change for the resource?
 var change = {
     power: 0,
+    ice: 0,
+    rock: 0,
+    metal: 0,
 }
 
-// Cost Multiplication Factor
-
-var costMulti = 1.2;
-
 // Check whether intro can be skipped
-
 var storyPosition = 0;
 
 //-------------------------
@@ -78,53 +117,61 @@ function panelBuy() {
     switch (gen.panel) {
         case 4:
             gen.panel += 1;
+            invMax.power = gen.panel * invStore.power;
             storyPosition += 1;
             inv.power -= cost.panel;
-            cost.panel = Math.floor(cost.panel*costMulti);
             document.getElementById("panelUpgrade").classList.remove("hidden");
+            feedtext(txt.panelBuy);
             break;
         default:
             gen.panel += 1;
+            invMax.power += invStore.power;
             inv.power -= cost.panel;
-            cost.panel = Math.floor(cost.panel*costMulti);
+            feedtext(txt.panelBuy);
             break;
     }
 }
 
-function houndBuy() {
-    gen.hound += 1;
+function miningDroneBuy() {
+    gen.miningDrone += 1;
+    active.miningDrone += 1;
+    document.getElementById("miningDroneActive").innerHTML = active.miningDrone;
 }
+
 //-------------------------
 // Purchase Upgrades
 //-------------------------
 
-function panelUpgradeOne() {
+function panelUpgrade() {
     prod.panel = Math.round(prod.panel*1e12 + upgradeChange.panel[upgrade.panel]*1e12)/1e12;
-    inv.power -= cost.panelUpgradePower[upgrade.panel];
+    inv.power -= cost.panelUpgrade[upgrade.panel];
     upgrade.panel += 1;
     document.getElementById("trayLeftBottom").classList.remove("hidden");
+    feedtext(txt.panelUpgrade1);
 }
-
 //-------------------------
-// Generator Functions
+// Functions to Calculate Resource Changes
 //-------------------------
 
 function powerAuto() {
-    inv.power = Math.round(inv.power*1e12 + change.power*1e12)/1e12;
-    document.getElementById("powerInv").innerHTML = inv.power  + "  <img src='images/powerIcon.png'  height='15' width='15'>";
-}
-
-//-------------------------
-// Functions to Show Changes
-//-------------------------
-
-function resourceChange() {
-    change.power = Math.round(gen.panel*1e12*prod.panel)/1e12;
+    usage.power = Math.round(active.miningDrone*1e12*2.5)/1e12;
+    change.power = Math.round(gen.panel*1e12*prod.panel - usage.power*1e12)/1e12;
     if (change.power >= 0) {
         document.getElementById("powerChange").innerHTML = "+" + change.power;
     } else {
         document.getElementById("powerChange").innerHTML = change.power;
     }
+    if (inv.power + change.power > invMax.power) {
+        inv.power = invMax.power;
+        document.getElementById("powerInv").innerHTML = inv.power  + "/" + invMax.power + "  <img src='images/powerIcon.png'>";
+    } else {
+        inv.power = Math.round(inv.power*1e12 + change.power*1e12)/1e12;
+        document.getElementById("powerInv").innerHTML = inv.power  + "/" + invMax.power + "  <img src='images/powerIcon.png'>";
+    }
+}
+
+function iceAuto() {
+    change.ice = Math.round(gen.ice*1e12*prod.ice)/1e12;
 }
 
 //-------------------------
@@ -132,50 +179,70 @@ function resourceChange() {
 //-------------------------
 
 function buttonEnableDisable() {
-    if (inv.power < cost.panel) {
-        document.getElementById("panelBuy").classList.add("disabled");
-        document.getElementById("panelBuy").disabled = true;
-    } else {
+    // Unfold Panels
+    if (inv.power >= cost.panel && gen.panel < genMax.panel) {
         document.getElementById("panelBuy").classList.remove("disabled");
         document.getElementById("panelBuy").disabled = false;
+    } else {
+        document.getElementById("panelBuy").classList.add("disabled");
+        document.getElementById("panelBuy").disabled = true;
     }
-    if (inv.power < cost.panelUpgradePower[upgrade.panel]) {
+    // Upgrade Panels
+    if (inv.power < cost.panelUpgrade[upgrade.panel]) {
         document.getElementById("panelUpgrade").classList.add("disabled");
         document.getElementById("panelUpgrade").disabled = true;
     } else {
         document.getElementById("panelUpgrade").classList.remove("disabled");
         document.getElementById("panelUpgrade").disabled = false;
     }
+    // Buy Mining Drones
+    if (inv.power >= cost.miningDrone && gen.miningDrone < genMax.miningDrone){
+        document.getElementById("miningDroneBuy").classList.remove("disabled");
+        document.getElementById("miningDroneBuy").disabled = false;
+    } else {
+        document.getElementById("miningDroneBuy").classList.add("disabled");
+        document.getElementById("miningDroneBuy").disabled = true;
+    }
+    // Mining Drone Plus
+    if (active.miningDrone < genMax.miningDrone) {
+        document.getElementById("miningDronePlus").classList.remove("disabled");
+        document.getElementById("miningDronePlus").disabled = false;
+    } else {
+        document.getElementById("miningDronePlus").classList.add("disabled");
+        document.getElementById("miningDronePlus").disabled = true;
+    }
+    // Mining Drone Minus
+    if (active.miningDrone > 0) {
+        document.getElementById("miningDroneMinus").classList.remove("disabled");
+        document.getElementById("miningDroneMinus").disabled = false;
+    } else {
+        document.getElementById("miningDroneMinus").classList.add("disabled");
+        document.getElementById("miningDroneMinus").disabled = true;
+    }    
+}
+
+//-------------------------
+// Functions for +/- Buttons
+//-------------------------
+
+function miningDronePlus() {
+    active.miningDrone += 1;
+    document.getElementById("miningDroneActive").innerHTML = active.miningDrone;
+}
+
+function miningDroneMinus() {
+    active.miningDrone -= 1;
+    document.getElementById("miningDroneActive").innerHTML = active.miningDrone;
 }
 
 //-------------------------
 // Functions for the introduction
 //-------------------------
 
-function introCheck() {
-    var storyTemp = JSON.parse(localStorage.getItem("storyPosition"));
-    if (storyTemp !== null) {
-        storyPosition = storyTemp;
-    }
-    switch (storyPosition) {
-        case 0:
-            introOne();
-            break;
-        default:
-            gen.panel += 1;
-            cost.panel = Math.floor(cost.panel * costMulti);
-            document.getElementById("title").classList.remove("hidden");
-            document.getElementById("inv").classList.remove("hidden");
-            document.getElementById("feed").classList.remove("hidden");
-            document.getElementById("tray").classList.remove("hidden");
-            document.getElementById("powerClick").disabled = false;
-            break;
-    }
-}
-
 function introOne() {
     typeWriter(txt.one, "story");
     setTimeout(introTwo, 3000);
+    inv.power = 0;
 }
 
 function introTwo() {
@@ -197,6 +264,7 @@ function introFour() {
     document.getElementById("story").innerHTML = "";
     typeWriter(txt.four, "story");
     setTimeout(function(){document.getElementById("introButton").classList.remove("hidden"); document.getElementById("storyPower").classList.remove("hidden");
+    document.getElementById("storyPower").innerHTML = inv.power + "  <img src='images/powerIcon.png'>";
     document.getElementById("introButton").disabled=false}, 4000);
 }
 
@@ -206,7 +274,7 @@ function introButtonOne() {
         typewriter.i = 0;
         document.getElementById("introButton").classList.add("hidden");
         document.getElementById("introButton").disabled = true;
-        document.getElementById("storyPower").innerHTML = inv.power;
+        document.getElementById("storyPower").innerHTML = inv.power + "  <img src='images/powerIcon.png'>";
         document.getElementById("story").innerHTML = "";
         typeWriter(txt.five, "story");
         setTimeout(function(){document.getElementById("story").innerHTML = ""; typewriter.i = 0; typeWriter(txt.six, "story"); 
@@ -215,19 +283,18 @@ function introButtonOne() {
             document.getElementById("introButton").disabled = false},5000);
     } else {
         inv.power += 1;
-        document.getElementById("storyPower").innerHTML = inv.power;
+        document.getElementById("storyPower").innerHTML = inv.power + "  <img src='images/powerIcon.png'>";
     }    
 }
 
 function introButtonTwo() {
     gen.panel += 1;
     inv.power -= cost.panel;
-    cost.panel = Math.floor(cost.panel*costMulti);
     typewriter.i = 0;
     storyPosition = 1;
     document.getElementById("introButton").classList.add("hidden");
     document.getElementById("storyPower").classList.add("hidden");
-    document.getElementById("storyPower").innerHTML = inv.power;
+    document.getElementById("storyPower").innerHTML = inv.power + "  <img src='images/powerIcon.png'  height='15' width='15'>";
     document.getElementById("introButton").disabled = true;
     document.getElementById("story").innerHTML = "";
     typeWriter(txt.seven, "story");
@@ -245,22 +312,34 @@ function introButtonTwo() {
 // Functions to run every half-second
 var SecondLoop = window.setInterval(function() {
     powerAuto();
-    buttonEnableDisable();
 }, 1000)
 
 // Functions to run every tenth of a second
 var tenthSecondLoop = window.setInterval(function() {
-    resourceChange()
+    buttonEnableDisable();
 }, 100)
 
 // Every 15 seconds, make an autosave
 var saveGameLoop = window.setInterval(function() {
-    localStorage.setItem("storyPosition", JSON.stringify(storyPosition))
+    localStorage.setItem("storyPosition", JSON.stringify(storyPosition));
+    localStorage.setItem("invSave", JSON.stringify(inv));
+    localStorage.setItem("genSave", JSON.stringify(gen));
+    localStorage.setItem("invMaxSave", JSON.stringify(invMax));
 }, 15000)
-
 //-------------------------
 // Misc Functions
 //-------------------------
+
+// Text Feed
+function feedtext(text) {
+    document.getElementById("feed7").innerHTML = document.getElementById("feed6").innerHTML;
+    document.getElementById("feed6").innerHTML = document.getElementById("feed5").innerHTML;
+    document.getElementById("feed5").innerHTML = document.getElementById("feed4").innerHTML;
+    document.getElementById("feed4").innerHTML = document.getElementById("feed3").innerHTML;
+    document.getElementById("feed3").innerHTML = document.getElementById("feed2").innerHTML;
+    document.getElementById("feed2").innerHTML = document.getElementById("feed1").innerHTML;
+    document.getElementById("feed1").innerHTML = text;
+}
 
 // Provides typewriter effect with string as parameter one, and target id as parameter two
 function typeWriter(text, target) {
@@ -274,6 +353,45 @@ function typeWriter(text, target) {
 // Resets local data - turn into new game button at some point?
 function reset() {
     storyPosition = 0;
-    localStorage.setItem("storyPosition", JSON.stringify(storyPosition))
+    localStorage.clear();
     location.reload();
+}
+
+// Function that runs upon load
+function load() {
+    // Check local storage for story position
+    var storyTemp = JSON.parse(localStorage.getItem("storyPosition"));
+    if (storyTemp !== null) {
+        storyPosition = storyTemp;
+    }
+    // Assign temporary variables from save data
+    var invTemp = JSON.parse(localStorage.getItem("invSave"));
+    var genTemp = JSON.parse(localStorage.getItem("genSave"));
+    var invMaxTemp = JSON.parse(localStorage.getItem("invMaxSave"));
+    if (invTemp !== null) {
+        inv = invTemp;
+    }
+    if (genTemp !== null) {
+        gen = genTemp;
+    }
+    if (invMaxTemp !== null) {
+        invMax = invMaxTemp;
+    }
+    // Determine whether buttons are visible
+    if (gen.panel >= 5) {
+        document.getElementById("panelUpgrade").classList.remove("hidden");
+    }
+    // Run intro if needed
+    switch (storyPosition) {
+        case 0:
+            introOne();
+            break;
+        default:
+            document.getElementById("title").classList.remove("hidden");
+            document.getElementById("inv").classList.remove("hidden");
+            document.getElementById("feed").classList.remove("hidden");
+            document.getElementById("tray").classList.remove("hidden");
+            document.getElementById("powerClick").disabled = false;
+            break;
+    }
 }

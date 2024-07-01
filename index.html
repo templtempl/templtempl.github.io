@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <link rel="stylesheet" href="stylesheet.css">
     </head>
-    <body onload="introCheck()">
+    <body onload="load()">
         <div class="sidebar">
             <div class="title hidden" id="title">
                 <div>
@@ -14,29 +14,56 @@
             </div>
             <div class="inv hidden" id="inv">
                 <div class="invleft">
-                    <p>Power</p>
+                    <p>Energy</p>
+                    <p>Ice</p>
+                    <p>Rock</p>
+                    <p>Metal</p>
                 </div>
                 <div class="invright">
-                    <p id="powerInv" style="margin-bottom:0">0  <img src="images/powerIcon.png" height="15" width="15"></p>
+                    <!--Power-->
+                    <p id="powerInv" style="margin-bottom:0">0 <img src="images/powerIcon.png"></p>
                     <p id="powerChange" style="font-size:0.8vw;margin:0px">+0</p>
+                    <!--Ice-->
+                    <p id="iceInv" style="margin-bottom:0">0  <img src="images/iceIcon.png"></p>
+                    <p id="iceChange" style="font-size:0.8vw;margin:0px">+0</p>
+                    <!--Carbon-->
+                    <p id="carbonInv" style="margin-bottom:0">0  <img src="images/rockIcon.png"></p>
+                    <p id="carbonChange" style="font-size:0.8vw;margin:0px">+0</p>
+                    <!--Copper-->
+                    <p id="copperInv" style="margin-bottom:0">0  <img src="images/metalIcon.png"></p>
+                    <p id="copperChange" style="font-size:0.8vw;margin:0px">+0</p>
                 </div>
                 <button onclick="reset()" class="button">Reset</button>
             </div>
         </div>
         <div class="main">
             <div class="feed hidden" id="feed">
+                <div class="feedtext">
+                    <p id="feed7" style="margin:0; margin-left: 1vh; margin-top: 1vh; font-size:0.8vw; color:#404040"></p>
+                    <p id="feed6" style="margin:0; margin-left: 1vh; font-size:0.8vw; color:#606060"></p>
+                    <p id="feed5" style="margin:0; margin-left: 1vh; font-size:0.8vw; color:#808080"></p>
+                    <p id="feed4" style="margin:0; margin-left: 1vh; font-size:0.8vw; color:#a0a0a0"></p>
+                    <p id="feed3" style="margin:0; margin-left: 1vh; font-size:0.8vw; color:#c0c0c0"></p>
+                    <p id="feed2" style="margin:0; margin-left: 1vh; font-size:0.8vw; color:#e0e0e0"></p>
+                    <p id="feed1" style="margin:0; margin-left: 1vh; font-size:0.8vw"></p>
+                </div>
             </div>
             <div class="tray hidden" id="tray">
                 <div class="trayLeft" id="trayLeft">
                     <div class="trayLeftTop" id="trayLeftTop">
                         <p style="font-weight:bold; font-size: 1.5vw; margin: 1vh auto; position: block">SOLAR PANELS</p>
                         <button onclick="panelBuy()" class="button disabled" id="panelBuy">Unfold Panel</button>
-                        <button onclick="panelUpgradeOne()" class="button disabled hidden" id="panelUpgrade">Clean Panels</button>
+                        <button onclick="panelUpgrade()" class="button disabled hidden" id="panelUpgrade">Align Panels</button>
                     </div>
                     <div class="trayLeftBottom hidden" id="trayLeftBottom">
                         <p style="font-weight:bold; font-size: 1.5vw; margin: 1vh auto; position: block">MINING DRONES</p>
-                        <button onclick="houndBuy()" class="button disabled" id="houndBuy">Activate Hound Drone</button>
-                        <button onclick="exploratoryCharge()" class="button disabled" id="exploratoryCharge">Start Charging</button>
+                        <button onclick="miningDroneBuy()" class="button disabled" id="miningDroneBuy">Activate Mining Drone</button>
+                        <div style="width:95%; margin: 0 auto;">
+                            <p id="miningDronePlusMinus" style="font-size: 1.1vw; position: inline; float:left">Drones</p>
+                            <button onclick="miningDronePlus()" class="buttonPlusMinus disabled" id="miningDronePlus">+</button>
+                            <p id="miningDroneActive" style="font-size: 1.1vw; margin: 1vw; position: relative; float: right">0</p>
+                            <button onclick="miningDroneMinus()" class="buttonPlusMinus disabled" id="miningDroneMinus">-</button>
+                        </div>
                     </div>
                 </div>
                 <div class="trayCentreLeft" id="trayCentreLeft">
@@ -68,7 +95,7 @@
         <div class="story" id="storyIntro">
             <p id="story"></p>
             <button onclick="introButtonOne()" class="buttonStory hidden" id="introButton" disabled=true>Generate Power</button>
-            <p id="storyPower" class="storywatts hidden">0</p>
+            <p id="storyPower" class="storywatts hidden"></p>
         </div>
         <script src="main.js" charset="utf-8" type="text/javascript"></script>
     </body>
